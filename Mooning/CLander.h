@@ -132,9 +132,7 @@ public:
   
 	void Render(HDC &surface); /*!< Renders ship */
   
-	void Reset(SVector2D &NewPadPos); /*!< Resets all relevant variables for the start of a new attempt */
-
-	void  UpdateShip(double TimeElapsed); /*!< Updates the ship from a keypress */
+	void Reset(SVector2D &NewPadPos); /*!< Resets all relevant variables for the start of a new attempt */	
 
 	bool UpdateShip(); /*!< Another implemetation of UpdateShip. Will know its function
 						later on 2103-07-03. */

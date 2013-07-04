@@ -1,8 +1,15 @@
+/**
+\class CLander
+
+\author Mat Buckland 2002
+
+\note A class to define a lunar lander object
+*/
 #include "CLander.h"
 
-//this defines the vertices for the lander shape
-const int	 NumLanderVerts = 30;
+const int	 NumLanderVerts = 30; /*!< this defines the vertices for the lander shape */
 
+/// This array contains the points for rendering the ship
 const SPoint lander[NumLanderVerts] = {//middle of lander
                                        SPoint(-1, 0),
                                        SPoint(1, 0),    
@@ -39,8 +46,7 @@ const SPoint lander[NumLanderVerts] = {//middle of lander
                                        SPoint(0.3, -0.8),
                                        SPoint(0.2, -0.5)};
 
-//and the vertices for the jet
-const int NumJetVerts = 5;
+const int NumJetVerts = 5; /*!< and the vertices for the jet */
 
 const SPoint jet[NumJetVerts] = {SPoint(-0.1, -0.9),
                                  SPoint(-0.2, -1.2),
@@ -52,8 +58,9 @@ const SPoint jet[NumJetVerts] = {SPoint(-0.1, -0.9),
 
                                        
 
-//macro for the user input when controlling a ship manually
-#define KEYDOWN(vk_code) ((GetAsyncKeyState(vk_code) & 0x8000) ? 1 : 0)
+///macro for the user input when controlling a ship manually
+// not used when GA controlled
+//#define KEYDOWN(vk_code) ((GetAsyncKeyState(vk_code) & 0x8000) ? 1 : 0)
 
 //----------------------------------- ctor -------------------------------
 //
@@ -71,6 +78,9 @@ CLander::CLander(int       cxClient,
 						                    m_dScale(LANDER_SCALE),
 						                    m_cxClient(cxClient),
 						                    m_cyClient(cyClient),
+											m_dFitness(0),
+											m_cTick(0),
+											m_iPadX(cxClient / 2),
                                 m_bCheckedIfLanded(false)
                            
 {
@@ -98,10 +108,12 @@ CLander::CLander(int       cxClient,
 //------------------------------------------------------------------
 void CLander::Reset(SVector2D &NewPadPos)
 {
-	m_vPos		     = SVector2D(WINDOW_WIDTH/2, m_cyClient-50);
-	m_dRotation	   = PI;
+	m_vPos		     = m_vStartPos;
+	m_dRotation	   = m_dStartRotation;
 	m_vVelocity.x  = 0;
 	m_vVelocity.y  = 0;
+	m_cTick = 0;
+	m_dFitness = 0;
   m_vPadPos      = NewPadPos;
   m_bCheckedIfLanded = false;
 
@@ -155,31 +167,6 @@ bool CLander::TestForImpact(vector<SPoint> &ship)
   return false;
 }
 
-//-----------------------LandedOK------------------------------------
-//
-// calculates if the ship has made it down safetly or not.
-//-------------------------------------------------------------------
-bool CLander::LandedOK()
-{
-
-	//calculate distance from pad
-  double DistFromPad = fabs(m_vPadPos.x - m_vPos.x);
-  
-  //calculate speed of lander
-  double speed = sqrt((m_vVelocity.x*m_vVelocity.x) 
-					           +(m_vVelocity.y*m_vVelocity.y));
-
-
-  //check if we have a successful landing
-  if( (DistFromPad            < DIST_TOLERANCE)       && 
-      (speed                  < SPEED_TOLERANCE)      && 
-      (fabs(m_dRotation)      < ROTATION_TOLERANCE))
-  {
-    return true;
-  }
-
-  return false;
-}
 
 //------------------------- Render ---------------------------------------
 //
@@ -244,85 +231,90 @@ void CLander::Render(HDC &surface)
     {
       LineTo(surface, m_vecJetVBTrans[vert].x, m_vecJetVBTrans[vert].y);
     }
-  }
-
-  if (m_bCheckedIfLanded)
-  {
-    if(LandedOK())
-    {
-      string s = "Great Landing!";
-      TextOutA(surface, 150, 160, s.c_str(), s.size());
-    }
-
-    else
-    {
-      string s = "Crashed!";
-      TextOutA(surface, 160, 160, s.c_str(), s.size());
-    }
-  }
+  }  
 }
 //-----------------------UpdateShip---------------------------------------
 //
 //	first checks if user is pressing an action key then updates the physics
 //  and tests to see if the ship has landed or not.
 //------------------------------------------------------------------------
-void CLander::UpdateShip(double TimeElapsed)
+bool CLander::UpdateShip()
 {
   //just return if ship has crashed or landed
   if (m_bCheckedIfLanded)
   {
-    return;
+    return false;
   }
   
-  //switch the jet graphic off
+  action_type action;
+
+  //check that we still have an action to perform. If not then
+  //just let the lander drift til it hits the ground
+  if (m_cTick >= m_vecActions.size())
+  {
+    action = non;
+  }
+
+  else
+  {
+    action = m_vecActions[m_cTick++];
+  }
+
+    //switch the jet graphic off
   m_bJetOn = false;
   	
-	//test for user input and update accordingly
-	if (KEYDOWN(VK_SPACE))
+	switch (action)
 	{
-    //the lander's acceleration per tick calculated from the force the
-    //thruster exerts, the lander's mass and the time elapsed since the
-    //last frame
-    double ShipAcceleration = (THRUST_PER_SECOND * TimeElapsed) / m_dMass;
+	case rotate_left:
 
-		//resolve the acceleration vector into its x, y components
-    //and add to the lander's velocity vector
-    m_vVelocity.x += ShipAcceleration * sin(m_dRotation);
-		m_vVelocity.y += ShipAcceleration * cos(m_dRotation);
-
-    //switch the jet graphic on
-    m_bJetOn = true;
-	}
-  
-	if (KEYDOWN(VK_LEFT))
-	{
-		m_dRotation -= ROTATION_PER_SECOND * TimeElapsed;
+		m_dRotation -= ROTATION_PER_TICK;
 
 		if (m_dRotation < -PI)
 		{
-			m_dRotation += 2*PI;
+			m_dRotation += TWO_PI;
 		}
-		
-	}
+		break;
 
-	if (KEYDOWN(VK_RIGHT))
-	{
-	
-		m_dRotation += ROTATION_PER_SECOND * TimeElapsed;
+	case rotate_right:
 
-		if (m_dRotation > 2*PI)
+		m_dRotation += ROTATION_PER_TICK;
+
+		if (m_dRotation > TWO_PI)
 		{
-			m_dRotation -= 2*PI;
+			m_dRotation -= TWO_PI;
 		}
-		
-	}
+		break;
+
+	case thrust:
+    {
+      //the lander's acceleration per tick calculated from
+      //the force the thruster exerts and the lander's mass
+      double ShipAcceleration = THRUST_PER_TICK/m_dMass;
+
+	    //resolve the acceleration vector into its x, y components
+      //and add to the lander's velocity vector
+      m_vVelocity.x += ShipAcceleration * sin(m_dRotation);
+		  m_vVelocity.y += ShipAcceleration * cos(m_dRotation);
+		  
+      //switch the jet graphic on
+      m_bJetOn = true;
+    }
+
+		break;
+
+	case non:
+
+		break;
+
+	}//end switch
+
 
 	
   //now add in the gravity vector
-	m_vVelocity.y += GRAVITY * TimeElapsed;
+	m_vVelocity.y += GRAVITY_PER_TICK;
 
 	//update the lander's position
-  m_vPos += m_vVelocity * TimeElapsed * SCALING_FACTOR;
+  m_vPos += m_vVelocity;
 
   
 
@@ -352,21 +344,69 @@ void CLander::UpdateShip(double TimeElapsed)
     //check if user has landed ship
     if (!m_bCheckedIfLanded)
     {
-      if(LandedOK())
+      if(!m_dFitness)
       {
-        PlaySoundA("landed", NULL, SND_ASYNC|SND_FILENAME);;
-      }
+        CalculateFitness();
+		m_bCheckedIfLanded = true;
+      }     
 
-      else
-      {
-        PlaySoundA("explosion", NULL, SND_ASYNC|SND_FILENAME);
-      }
-
-      m_bCheckedIfLanded = true;
+      return false;
     }
 
   }
 
-  return;	
+  return true;	
 }
 
+//-----------------------CalculateFitness-----------------------------
+//
+//	calculates a fitness score based on how far the lander is away 
+//	from the pad, what speed it's travelling when it reaches ground
+//	level and its angle at touchdown.
+//-------------------------------------------------------------------
+void CLander::CalculateFitness()
+{
+	//calculate distance from pad
+  double DistFromPad = fabs(m_vPadPos.x - m_vPos.x);
+
+  double distFit = m_cxClient-DistFromPad;
+  
+  //calculate speed of lander
+  double speed = sqrt((m_vVelocity.x*m_vVelocity.x) 
+					           +(m_vVelocity.y*m_vVelocity.y));
+
+  //fitness due to rotation
+  double rotFit = 1/(fabs(m_dRotation)+1);
+
+  //fitness due to time in air
+  double fitAirTime = (double)m_cTick/(speed+1);
+
+  //calculate fitness
+  m_dFitness = distFit + 400*rotFit + 4* fitAirTime; 
+
+  //check if we have a successful landing
+  if( (DistFromPad            < DIST_TOLERANCE)       && 
+      (speed                  < SPEED_TOLERANCE)      && 
+      (fabs(m_dRotation)      < ROTATION_TOLERANCE))
+  {
+    m_dFitness = BIG_NUMBER;
+  }
+}
+
+//----------------------------- Decode() ---------------------------------
+//
+//  takes a genome an decodes it into its sequence of actions
+//------------------------------------------------------------------------
+void CLander::Decode(const vector<SGene> &actions)
+{
+	//clear
+	m_vecActions.clear();
+
+	for(int i = 0; i < actions.size(); ++i)
+	{
+		for(int j = 0; j < actions[i].duration; ++j)
+		{
+			m_vecActions.push_back(actions[i].action);
+		}
+	}
+}
