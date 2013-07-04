@@ -34,7 +34,9 @@
 #define ROTATION_PER_SECOND   3.0
 
 //approx gravity on moon
-#define GRAVITY               -1.63
+#define GRAVITY               -1.63 
+#define THRUST                350.0
+#define ROTATION              3.0
 
 #define GRAVITY_PER_TICK      GRAVITY/FRAMES_PER_SECOND
 #define THRUST_PER_TICK       THRUST/FRAMES_PER_SECOND
