@@ -123,7 +123,7 @@ private:
 
 
 public:
-
+	/*! \class CLander */
 	CLander(int cxClient,	/*!< [in] Local record of Window's x position*/
           int cyClient,		/*!< [in] Local record of Window's y position*/
           double rot,		/*!< [in] Starting rotation of lander */

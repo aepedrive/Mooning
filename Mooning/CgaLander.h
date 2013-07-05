@@ -67,6 +67,7 @@ class CgaLander
 		void CalculateBestWorstAvTot();
 
 	public:
+		/*! \class CgaLander */
 		CgaLander(double cross_rat, double mut_rat, int pop_size,
 					int num_actions, int cxClient, int cyClient):m_dCrossoverRate(cross_rat),
 																 m_dMutationRate(mut_rat),
@@ -84,7 +85,7 @@ class CgaLander
 
 		///takes a population of genomes and performs one epoch.
 		///and creates a new population
-		void UpdatePop(vector<SGene> &OldPop);
+		void UpdatePop(vector<SGenome> &OldPop);
 
 		///accesor method
 		int Generation()const {return m_iGeneration;}
