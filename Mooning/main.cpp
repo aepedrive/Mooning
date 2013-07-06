@@ -17,7 +17,7 @@
 
 ///////////////////////GLOBALS ////////////////////////////////////
 
-LPCWSTR			szApplicationName = L"Chapter6 - Lunar Lander - Manned";
+LPCWSTR			szApplicationName = L"Chapter6 - Lunar Lander - Unmanned";
 LPCWSTR			szWindowClassName = L"Lander";
 
 
@@ -105,6 +105,22 @@ LRESULT CALLBACK WindowProc(HWND hWnd,
           }
 
           break;
+
+		  case 'F':
+					{
+						g_pController->ToggleFastRender();
+					}
+					
+					break;
+
+		case 'B':
+          {
+            g_pController->ToggleShowFittest();
+
+           }
+
+          break;
+
 
 			}//end WM_KEYUP switch
 		}
@@ -249,9 +265,9 @@ int WINAPI WinMain(	HINSTANCE hinstance,
 			}
 		}
 							
-		if (timer.ReadyForNextFrame())
+		if (timer.ReadyForNextFrame() || g_pController->FastRender())
 		{	
-		  if(!g_pController->Update(timer.GetTimeElapsed()))
+		  if(!g_pController->Update())
 			{
 				//we have a problem, end app
 				bDone = true;

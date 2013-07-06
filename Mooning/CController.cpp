@@ -161,17 +161,17 @@ void CController::Render(HDC &surface)
   SetTextColor(surface, RGB(0,0,255));
   
 	string s = "Generation: " + itos(m_iGeneration);
-	TextOut(surface, 5, 2, s.c_str(), s.size());
+	TextOutA(surface, 5, 2, s.c_str(), s.size());
 
 
   s = "F-Toggle Fast Render";
-	TextOut(surface, 250, m_cyClient-15, s.c_str(), s.size());
+	TextOutA(surface, 250, m_cyClient-15, s.c_str(), s.size());
 
   s = "B-Show Fittest";
-	TextOut(surface, 5, m_cyClient-15, s.c_str(), s.size());
+	TextOutA(surface, 5, m_cyClient-15, s.c_str(), s.size());
 
   s = "R-Reset";
-	TextOut(surface, 150, m_cyClient-15, s.c_str(), s.size());
+	TextOutA(surface, 150, m_cyClient-15, s.c_str(), s.size());
 
 
     //replace the pen
@@ -222,7 +222,7 @@ void CController::WorldTransform(vector<SPoint> &pad)
 //------------------------------- Update ---------------------------------
 //
 //------------------------------------------------------------------------
-bool CController::Update(double TimeElapsed)
+bool CController::Update()
 {
 	//if number of generations exceeds a predifined maximum before
   //finding a solution restart the GA

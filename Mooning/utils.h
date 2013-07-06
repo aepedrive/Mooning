@@ -48,7 +48,7 @@ string ftos (float arg);
 void Clamp(double &arg, double min, double max);
 void Clamp(int &arg, int min, int max);
 
-/////////////////////////////////////////////////////////////////////
+/*////////////////////////////////////////////////////////////////////
 //
 //	Point structure
 //
@@ -62,7 +62,7 @@ struct SPoint
   SPoint(double a, double b):x(a),y(b){}
 };
 
-
+*/
 
 
 #endif

@@ -78,7 +78,7 @@ public:
   //this is called from the windows message loop and calls
   //CLander::CheckForKeyPress() which tests for user input 
   //and updates the lander's position accordingly
-  bool  Update(double TimeElapsed);
+  bool  Update();
 
   //initialize a new run
   void  NewRun();
