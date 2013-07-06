@@ -1,17 +1,13 @@
 #ifndef C2DMATRIX_H
 #define C2DMATRIX_H
 
-//------------------------------------------------------------------------
-//
-//	Name: C2DMatrix.h
-//
-//  Author: Mat Buckland 2002
-//
-//  Desc: Matrix class  from the book Game AI Programming with Neural Nets
-//        and Genetic Algorithms. 
-//
-//------------------------------------------------------------------------
-
+/*! \file C2DMatrix.h
+*
+*   \author Mat Buckland 2002
+*
+*   \brief Matrix class  from the book Game AI Programming with Neural Nets
+*        and Genetic Algorithms. 
+*/
 #include <stdlib.h>
 #include <math.h>
 #include <iostream>
